@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "misc:back-to-school": "ts-node ./src/misc/back-to-school.ts"
+    "misc:back-to-school": "ts-node ./src/misc/back-to-school/index.ts"
   },
   "repository": {
     "type": "git",
