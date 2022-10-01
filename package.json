@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "misc:back-to-school": "ts-node ./src/misc/back-to-school/index.ts",
-    "misc:rfc4648": "ts-node ./src/misc/rfc4648/index.ts",
-    "misc:its-corn": "ts-node ./src/misc/its-corn/index.ts",
-    "misc:logic": "ts-node ./src/misc/logic/index.ts",
-    "misc:rome": "ts-node ./src/misc/rome/index.ts",
-    "trivia:netcat": "ts-node ./src/trivia/netcat/index.ts"
+    "misc:back-to-school": "ts-node ./src/challenges/misc/back-to-school/index.ts",
+    "misc:rfc4648": "ts-node ./src/challenges/misc/rfc4648/index.ts",
+    "misc:its-corn": "ts-node ./src/challenges/misc/its-corn/index.ts",
+    "misc:logic": "ts-node ./src/challenges/misc/logic/index.ts",
+    "misc:rome": "ts-node ./src/challenges/misc/rome/index.ts",
+    "trivia:netcat": "ts-node ./src/challenges/trivia/netcat/index.ts"
   },
   "repository": {
     "type": "git",
