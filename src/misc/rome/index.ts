@@ -1,4 +1,4 @@
-// NOTE: SAME AS ROME!
+// NOTE: SAME AS ITS-CORN!
 import net from "net";
 import chalk from "chalk";
 
@@ -8,7 +8,7 @@ interface Position {
 }
 
 const URL = "nc.ctf.unitedctf.ca";
-const PORT = 5001;
+const PORT = 5002;
 const socket = new net.Socket();
 
 const WALL = "#";
@@ -111,7 +111,7 @@ socket.on("data", (data) => {
     .replace(new RegExp(WALK, "g"), chalk.cyanBright(WALK));
   console.info(mazeString);
 
-  // Send the path to the server
+  //   Send the path to the server
   let res = "";
   let pathStr = "";
   path.forEach((pos) => {

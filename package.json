@@ -6,7 +6,8 @@
   "scripts": {
     "misc:back-to-school": "ts-node ./src/misc/back-to-school/index.ts",
     "misc:rfc4648": "ts-node ./src/misc/rfc4648/index.ts",
-    "misc:its-corn": "ts-node ./src/misc/its-corn/index.ts"
+    "misc:its-corn": "ts-node ./src/misc/its-corn/index.ts",
+    "misc:rome": "ts-node ./src/misc/rome/index.ts"
   },
   "repository": {
     "type": "git",
