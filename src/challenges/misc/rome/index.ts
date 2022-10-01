@@ -1,15 +1,11 @@
 // NOTE: SAME AS ITS-CORN!
-import net from "net";
 import chalk from "chalk";
+import nc from "../../../utils/nc";
 
 interface Position {
   x: number;
   y: number;
 }
-
-const URL = "nc.ctf.unitedctf.ca";
-const PORT = 5002;
-const socket = new net.Socket();
 
 const WALL = "#";
 const EMPTY = " ";
@@ -72,11 +68,7 @@ const findShortestPath = (
   return [];
 };
 
-socket.connect(PORT, URL, () => {
-  console.info("Connected");
-});
-
-socket.on("data", (data) => {
+nc(5002, (data, socket) => {
   console.info(data.toString());
 
   if (receivedMaze) {
@@ -128,8 +120,4 @@ socket.on("data", (data) => {
   pathStr += res;
   console.info(pathStr);
   socket.write(pathStr);
-});
-
-socket.on("close", () => {
-  console.info("Connection closed");
 });
