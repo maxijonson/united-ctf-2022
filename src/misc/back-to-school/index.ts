@@ -13,7 +13,7 @@ const solve = (equation: string) => {
 };
 
 socket.connect(PORT, URL, () => {
-  console.log("Connected");
+  console.info("Connected");
 });
 
 socket.on("data", (data) => {
@@ -33,5 +33,5 @@ socket.on("data", (data) => {
 });
 
 socket.on("close", () => {
-  console.log("Connection closed");
+  console.info("Connection closed");
 });

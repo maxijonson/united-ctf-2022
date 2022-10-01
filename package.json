@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "misc:back-to-school": "ts-node ./src/misc/back-to-school/index.ts",
-    "misc:rfc4648": "ts-node ./src/misc/rfc4648/index.ts"
+    "misc:rfc4648": "ts-node ./src/misc/rfc4648/index.ts",
+    "misc:its-corn": "ts-node ./src/misc/its-corn/index.ts"
   },
   "repository": {
     "type": "git",
@@ -25,6 +26,7 @@
   },
   "dependencies": {
     "fs-extra": "^10.1.0",
+    "chalk": "4.1.2",
     "nerdamer": "^1.1.13"
   }
 }
