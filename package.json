@@ -10,6 +10,7 @@
     "misc:logic": "ts-node ./src/challenges/misc/logic/index.ts",
     "misc:rome": "ts-node ./src/challenges/misc/rome/index.ts",
     "misc:mr-crochet": "ts-node ./src/challenges/misc/mr-crochet/index.ts",
+    "crypto:xor2": "ts-node ./src/challenges/crypto/xor2/index.ts",
     "trivia:netcat": "ts-node ./src/challenges/trivia/netcat/index.ts"
   },
   "repository": {
@@ -25,12 +26,14 @@
   "homepage": "https://github.com/maxijonson/united-ctf-2022#readme",
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
+    "@types/lodash": "^4.14.186",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "chalk": "4.1.2",
     "fs-extra": "^10.1.0",
+    "lodash": "^4.17.21",
     "nerdamer": "^1.1.13",
     "zip-a-folder": "^1.1.5"
   }
