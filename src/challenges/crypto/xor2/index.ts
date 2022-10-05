@@ -1,35 +1,38 @@
 import fs from "fs-extra";
-import _ from "lodash";
 import path from "path";
 
-const base64ToText = (base64: string) =>
-  Buffer.from(base64, "base64").toString();
+const textToHex = (text: string) => {
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    result += text.charCodeAt(i).toString(16);
+  }
+  return result;
+};
 
-const textToHex = (text: string) =>
-  text
-    .split("")
-    .map((c) => c.charCodeAt(0).toString(16).padStart(2, "0"))
-    .join("");
+const hexToText = (hex: string) => {
+  let result = "";
+  for (let i = 0; i < hex.length; i += 2) {
+    result += String.fromCharCode(parseInt(hex.substring(i, i + 2), 16));
+  }
+  return result;
+};
 
-const hexToText = (hex: string) =>
-  hex
-    .match(/.{1,2}/g)!
-    .map((c) => String.fromCharCode(Number(`0x${c}`)))
-    .join("");
+const hexToBigint = (hex: string) => {
+  return BigInt("0x" + hex);
+};
 
-const hexToBigint = (hex: string) => BigInt(`0x${hex}`);
+const bigintToHex = (bigint: bigint) => {
+  return bigint.toString(16);
+};
 
-const bigintToHex = (bigint: bigint) => bigint.toString(16);
+const solve = (cipher: string, dictionary: string[]) => {
+  const words = dictionary.map((w) => hexToBigint(textToHex(w.trim())));
+  const encrypted = hexToBigint(textToHex(cipher));
+  const flag = words.reduce((xor, word) => xor ^ word, encrypted);
+  console.log(hexToText(bigintToHex(flag)));
+};
 
-const dictionary = fs
-  .readFileSync(path.join(__dirname, "dictionary.txt"))
-  .toString()
-  .split("\n")
-  .map((w) => hexToBigint(textToHex(w.trim())));
-const encryptedFlag = hexToBigint(
-  textToHex(base64ToText("XWxPUD5HSBhAR1gHVnh9b31mNUg="))
+solve(
+  Buffer.from("XWxPUD5HSBhAR1gHVnh9b31mNUg=", "base64").toString(),
+  fs.readFileSync(path.join(__dirname, "dictionary.txt")).toString().split("\n")
 );
-
-const flag = _.shuffle(dictionary).reduce((acc, word) => acc ^ word, encryptedFlag);
-
-console.log(hexToText(bigintToHex(flag)));
