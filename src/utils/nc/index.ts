@@ -4,7 +4,8 @@ const URL = "nc.ctf.unitedctf.ca";
 
 export default (
   port: number,
-  onData: (data: Buffer, socket: net.Socket) => void | Promise<void>
+  onData: (data: Buffer, socket: net.Socket) => void | Promise<void>,
+  onClose?: () => void | Promise<void>
 ) => {
   const socket = new net.Socket();
   socket.connect(port, URL, () => {
@@ -17,5 +18,6 @@ export default (
 
   socket.on("close", () => {
     console.info("Connection closed");
+    onClose?.();
   });
 };

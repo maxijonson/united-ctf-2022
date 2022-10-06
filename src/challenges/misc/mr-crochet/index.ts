@@ -1,11 +1,15 @@
 import chalk from "chalk";
 import { execSync } from "child_process";
 import fs from "fs-extra";
+import _ from "lodash";
 import path from "path";
-import { zip } from "zip-a-folder";
 import nc from "../../../utils/nc";
 
 const REPO_PATH = path.join(__dirname, "repo");
+const ZIP_PATH = path.join(__dirname, "repo.zip");
+const NEWZIP_PATH = path.join(__dirname, "new.zip");
+
+let newZip64 = "";
 
 (async () => {
   // Create a new git repo in the repo folder
@@ -13,31 +17,35 @@ const REPO_PATH = path.join(__dirname, "repo");
   await fs.mkdir(REPO_PATH);
   execSync("git init", { cwd: REPO_PATH });
 
-  // Zip the repo folder
-  await zip(REPO_PATH, path.join(__dirname, "repo.zip"));
-
-  // Encode the zip file to base64
-  const zipFile = await fs.readFile(path.join(__dirname, "repo.zip"));
-  const zipFileBase64 = zipFile.toString("base64");
+  execSync("zip -r repo.zip repo", { cwd: __dirname });
+  const zip = await fs.readFile(ZIP_PATH);
 
   let zipSent = false;
+  nc(
+    5003,
+    async (data, socket) => {
+      const res = data.toString();
 
-  nc(5003, async (data, socket) => {
-    const res = data.toString();
-
-    if (!zipSent && res.endsWith("EOF\n")) {
-      socket.write(`${zipFileBase64}\nEOF\n`);
-      console.info(chalk.green("Sent zip file!"));
-      zipSent = true;
-      return;
-    }
-
-    if (!zipSent) {
+      if (!zipSent && res.endsWith("EOF\n")) {
+        socket.write(zip.toString("base64") + "\n");
+        socket.write("EOF\n");
+        zipSent = true;
         return;
-    }
+      }
 
-    const newZipFile = Buffer.from(res, "base64");
-    await fs.writeFile(path.join(__dirname, "new-repo.zip"), newZipFile);
-    await fs.writeFile(path.join(__dirname, "new-repo.txt"), res);
-  });
+      if (!zipSent) {
+        return;
+      }
+
+      newZip64 += res;
+    },
+    () => {
+      // Clean up
+      execSync("rm -rf repo.zip repo", { cwd: __dirname });
+
+      // Write the new zip file
+      const newZip = Buffer.from(newZip64, "base64");
+      fs.writeFileSync(NEWZIP_PATH, newZip);
+    }
+  );
 })();
