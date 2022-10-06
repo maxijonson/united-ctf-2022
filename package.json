@@ -9,6 +9,7 @@
     "misc:its-corn": "ts-node ./src/challenges/misc/its-corn/index.ts",
     "misc:logic": "ts-node ./src/challenges/misc/logic/index.ts",
     "misc:rome": "ts-node ./src/challenges/misc/rome/index.ts",
+    "misc:math": "ts-node ./src/challenges/misc/math/index.ts",
     "misc:mr-crochet": "ts-node ./src/challenges/misc/mr-crochet/index.ts",
     "crypto:xor2": "ts-node ./src/challenges/crypto/xor2/index.ts",
     "crypto:ecb2": "ts-node ./src/challenges/crypto/ecb2/index.ts",
