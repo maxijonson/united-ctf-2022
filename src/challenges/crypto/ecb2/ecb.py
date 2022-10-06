@@ -1,61 +1,136 @@
-#!/usr/bin/python3
-from Crypto.Cipher import AES
-from Crypto.Random import get_random_bytes
-from Crypto.Util.Padding import pad
-from base64 import b64encode
-import os
+/**
+ * Note: this algorithme only works partially. 
+ * For some reason, there are false positives causing the algorithm thinking that a character is 'a' when it is not valid. 
+ * When this happens, simply copy the partial flag in the "flag" variable and change the USERNAME to something different (with different length).
+ * The algorithm will then restart from where it failed and hopefully find the correct character.
+ */
+import _ from "lodash";
+import nc from "../../../utils/nc";
 
-FLAG1 = os.getenv("FLAG1")
-FLAG2 = os.getenv("FLAG2")
-KEY = get_random_bytes(16)
+const BLOCK_SIZE = 16;
+const HEX_BLOCK_SIZE = BLOCK_SIZE * 2;
+const GUESS_LENGTH = 1;
+const EOL = "\n";
+const REGISTER = "2" + EOL;
+const USERNAME = "maxi";
+const X = "X";
+const TOKEN_OFFSET = "Here's your token, use is to login: ".length;
+const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+let type: "menu" | "prompt" | "token" = "menu";
+let flag = "FLAG-";
+let targetBlock: string | null = null;
+let charIndex = 0;
 
-def encrypt(data: bytes, secret=FLAG2.encode(), key=KEY):
-    aes = AES.new(key, AES.MODE_ECB)
-    cipher = aes.encrypt(pad(data + secret, 16))
-    return b64encode(cipher).decode()
+const getInputReservedLength = () => {
+  return USERNAME.length + flag.length;
+};
 
+const getInputLength = () => {
+  return (
+    Math.floor(getInputReservedLength() / (BLOCK_SIZE - 1)) * BLOCK_SIZE +
+    BLOCK_SIZE -
+    GUESS_LENGTH
+  );
+};
 
-USERNAME = "admin"
-TOKEN = encrypt(USERNAME.encode())
+const getInput = () => {
+  const reservedLength = getInputReservedLength();
+  const inputLength = getInputLength();
 
-BANNER = """\
-~~~ Welcome to Secure Authenticator v1.0 🔒 ~~~
-"""
-MENU = """\
-[1] Login
-[2] Register
-[0] Quit
-"""
+  return `${X.repeat(inputLength - reservedLength)}${USERNAME}`;
+};
 
-print(BANNER)
-while True:
-    print(MENU)
-    choice = input("> ")
-    if choice == "0":
-        print("Good bye")
-        exit(0)
+const printInput = (input: string, ...args: any[]) => {
+  const chunks = _.chunk(input.split(""), 4);
+  console.info(chunks.map((c) => c.join("")).join(" "), ...args);
+}
 
-    elif choice == "1":
-        username = input("Username: ")
-        token = input("Token: ")
-        if username == USERNAME:
-            if token == TOKEN:
-                print(f"Welcome admin, here's your note: {FLAG1}")
-                exit(0)
-            print("Wrong token!")
-        else:
-            print(
-                "Sorry, can't log you in! Forgot to store your credentials in the database."
-            )
+const getBlocksFromToken = (tokenBase64: string) => {
+  const token = Buffer.from(tokenBase64, "base64");
+  const tokenHex = token.toString("hex");
+  const blocks = [];
+  for (let i = 0; i < tokenHex.length; i += HEX_BLOCK_SIZE) {
+    blocks.push(tokenHex.slice(i, i + HEX_BLOCK_SIZE));
+  }
+  return blocks;
+};
 
-    elif choice == "2":
-        username = input("Username: ")
-        if username == USERNAME:
-            print("You can't use this username.")
-            continue
-        token = encrypt(username.encode())
-        print(f"Here's your token, use is to login: {token}")
+const printBlocks = (hexBlocks: string[]) => {
+  const blockStrs = hexBlocks.map((block) => {
+    return _.chunk(block.split(""), 2)
+      .map((chunk) => chunk.join(""))
+      .join(" ");
+  });
+  console.info(blockStrs.join("\n"));
+};
 
-    else:
-        print("No such option.")
+const getTargetBlock = (tokenBlocks: string[]) => {
+  const reservedLength = getInputReservedLength();
+  const targetBlock = Math.floor(reservedLength / BLOCK_SIZE);
+  return tokenBlocks[targetBlock];
+};
+
+const nextType = () => {
+  switch (type) {
+    case "menu":
+      type = "prompt";
+      break;
+    case "prompt":
+      type = "token";
+      break;
+    case "token":
+      type = "prompt";
+      break;
+  }
+};
+
+nc(3000, (data, socket) => {
+  switch (type) {
+    case "menu":
+      socket.write(REGISTER);
+      break;
+    case "prompt":
+      if (targetBlock === null) {
+        socket.write(getInput() + EOL);
+      } else {
+        if (charIndex === CHARS.length) {
+          const logs = [
+            "No more chars to guess",
+            `Flag           : ${flag} (${flag.length})`,
+            `Target block   : ${targetBlock}`,
+            `Input length   : ${getInputLength()}`,
+            `Reserved length: ${getInputReservedLength()}`,
+            `Input (w/ char): ${getInput() + flag} (${(getInput() + flag).length})`,
+          ];
+          throw new Error(logs.join("\n"));
+        }
+        const i = getInput() + flag;
+        printInput(getInput() + flag + "?", CHARS[charIndex]);
+        socket.write(getInput() + flag + CHARS[charIndex] + EOL);
+      }
+      break;
+    case "token":
+      const token = data
+        .toString()
+        .split(EOL)[0]
+        .substring(TOKEN_OFFSET - 1)
+        .trim();
+      const blocks = getBlocksFromToken(token);
+      const tb = getTargetBlock(blocks);
+      if (targetBlock === null) {
+        targetBlock = tb;
+      } else if (targetBlock === tb) {
+        flag += CHARS[charIndex];
+        charIndex = 0;
+        targetBlock = null;
+        console.info("flag:", flag);
+      } else {
+        charIndex++;
+      }
+      socket.write(REGISTER);
+      break;
+  }
+
+  nextType();
+});
