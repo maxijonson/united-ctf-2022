@@ -12,7 +12,7 @@ const TOKEN_OFFSET = "Here's your token, use is to login: ".length;
 const CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-";
 
 let type: "menu" | "prompt" | "token" = "menu";
-let flag = "";
+let flag = "FLAG-";
 let targetBlock: string | null = null;
 let charIndex = 0;
 
@@ -20,13 +20,19 @@ const getInputReservedLength = () => {
   return USERNAME.length + flag.length;
 };
 
+const getInputLength = () => {
+  return (
+    Math.floor(getInputReservedLength() / (BLOCK_SIZE - 1)) * BLOCK_SIZE +
+    BLOCK_SIZE -
+    GUESS_LENGTH
+  );
+};
+
 const getInput = () => {
   const reservedLength = getInputReservedLength();
-  const inputLength =
-    Math.floor(reservedLength / BLOCK_SIZE) * BLOCK_SIZE +
-    BLOCK_SIZE -
-    GUESS_LENGTH;
-  return `${X.repeat(inputLength - reservedLength)}${USERNAME}${flag}`;
+  const inputLength = getInputLength();
+
+  return `${X.repeat(inputLength - reservedLength)}${USERNAME}`;
 };
 
 const getBlocksFromToken = (tokenBase64: string) => {
@@ -55,11 +61,11 @@ const getTargetBlock = (tokenBlocks: string[]) => {
 };
 
 /**
- * 1 . xxxx xxxx xxad min?
- * 2 . xxxx xxxx xadm in??
- * 3 . xxxx xxxx admi n???
- * 4 . xxxx xxxa dmin ????
- * 5 . xxxx xxad min? ????
+ * 1 . xxxx xxxx xxad min? = F
+ * 2 . xxxx xxxx xadm in?? = FL
+ * 3 . xxxx xxxx admi n??? = FLA
+ * 4 . xxxx xxxa dmin ???? = FLAG
+ * 5 . xxxx xxad min? ???? = FLAG-
  * 6 . xxxx xadm in?? ????
  * 7 . xxxx admi n??? ????
  * 8 . xxxa dmin ???? ????
@@ -92,15 +98,17 @@ nc(3000, (data, socket) => {
         socket.write(getInput() + EOL);
       } else {
         if (charIndex === CHARS.length) {
-            const logs = [
-                "No more chars to guess",
-                `Flag: ${flag}`,
-                `Target block: ${targetBlock}`,
-                `Input: ${getInput()} (${getInput().length})`,
-            ]
-            throw new Error(logs.join("\n"));
+          const logs = [
+            "No more chars to guess",
+            `Flag: ${flag} (${flag.length})`,
+            `Target block: ${targetBlock}`,
+            `Input length: ${getInputLength()}`,
+            `Reserved length: ${getInputReservedLength()}`,
+            `Input: ${getInput()} (${getInput().length})`,
+          ];
+          throw new Error(logs.join("\n"));
         }
-        socket.write(getInput() + CHARS[charIndex] + EOL);
+        socket.write(getInput() + flag + CHARS[charIndex] + EOL);
       }
       break;
     case "token":
@@ -127,5 +135,3 @@ nc(3000, (data, socket) => {
 
   nextType();
 });
-
-console.log(getInput(), getInput().length);
