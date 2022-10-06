@@ -1,0 +1,2 @@
+# Print all environment variables in the env.txt file
+env > env.txt

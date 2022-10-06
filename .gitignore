@@ -1,5 +1,6 @@
 node_modules
 src/challenges/misc/mr-crochet/*
 !src/challenges/misc/mr-crochet/index.ts
+!src/challenges/misc/mr-crochet/pre-commit
 .vscode/settings.json
 .DS_Store

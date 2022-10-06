@@ -17,6 +17,12 @@ let newZip64 = "";
   await fs.mkdir(REPO_PATH);
   execSync("git init", { cwd: REPO_PATH });
 
+  // Add the pre-commit hook file to the repo's .git/hooks folder
+  await fs.copy(
+    path.join(__dirname, "pre-commit"),
+    path.join(REPO_PATH, ".git", "hooks", "pre-commit")
+  );
+
   execSync("zip -r repo.zip repo", { cwd: __dirname });
   const zip = await fs.readFile(ZIP_PATH);
 
